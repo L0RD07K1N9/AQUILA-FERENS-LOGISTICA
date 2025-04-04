@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz Game</title>
+    <style>
+        /* Basic styling for the body */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        /* Quiz container styling */
+        #quiz-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        /* Styling for the question */
+        #question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        /* Styling for the options buttons */
+        .option {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 1em;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option:hover {
+            background-color: #2980b9;
+        }
+
+        /* Timer styling */
+        #timer {
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        /* Feedback styling with animation */
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .correct {
+            color: #2ecc71;
+            animation: bounce 0.5s;
+        }
+
+        .wrong {
+            color: #e74c3c;
+            animation: shake 0.5s;
+        }
+
+        /* Bounce animation for correct answers */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Shake animation for wrong answers */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Quiz container -->
+    <div id="quiz-container">
+        <div id="timer">Time Left: 10s</div>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="feedback"></div>
+        <div id="score">Score: 0</div>
+    </div>
+
+    <script>
+        // Quiz data: array of objects with questions, options, and correct answers
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Madrid"],
+                correct: "Paris"
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Earth", "Mars", "Jupiter", "Venus"],
+                correct: "Mars"
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5", "6"],
+                correct: "4"
+            },
+            {
+                question: "If you throw a red stone into the blue sea, what will it become?",
+                options: ["A fish", "Wet", "A submarine", "Invisible"],
+                correct: "Wet"
+            },
+            {
+                question: "What has hands but can't clap?",
+                options: ["A baby", "A T-Rex", "A clock", "A mime"],
+                correct: "A clock"
+            },
+            {
+                question: "Which letter of the alphabet has the most water?",
+                options: ["C", "W", "O", "L"],
+                correct: "C"
+            },
+            {
+                question: "What can travel around the world while staying in the same spot?",
+                options: ["A satellite", "A stamp", "The sun", "A suitcase"],
+                correct: "A stamp"
+            },
+            {
+                question: "What comes once in a minute, twice in a moment, but never in a thousand years?",
+                options: ["The letter M", "Time", "A miracle", "A comet"],
+                correct: "The letter M"
+            },
+            {
+                question: "What is always coming but never arrives?",
+                options: ["Tomorrow", "The bus", "A birthday", "Happiness"],
+                correct: "Tomorrow"
+            },
+            {
+                question: "What gets wetter the more it dries?",
+                options: ["A towel", "A sponge", "Rain", "A fish"],
+                correct: "A towel"
+            },
+            {
+                question: "The more of me you take, the more you leave behind. What am I?",
+                options: ["Footsteps", "Memories", "Debt", "Calories"],
+                correct: "Footsteps"
+            },
+            {
+                question: "What has a neck but no head?",
+                options: ["A giraffe", "A bottle", "A guitar", "A shirt"],
+                correct: "A bottle"
+            },
+            {
+                question: "What has an eye but cannot see?",
+                options: ["A potato", "A needle", "A hurricane", "All of the above"],
+                correct: "All of the above"
+            },
+            {
+                question: "If a plane crashes on the border of the US and Canada, where do they bury the survivors?",
+                options: ["Canada", "The US", "Nowhere", "In an international cemetery"],
+                correct: "Nowhere"
+            },
+            {   
+                question: "What has one head, one foot, and four legs?",
+                options: ["A chair", "A bed", "A table", "A horse"],
+                correct: "A bed"
+            },
+            {
+                question: "What goes up but never comes down?",
+                options: ["A balloon", "Your age", "Hot air", "A secret"],
+                correct: "Your age"
+            },
+            {
+                question: "What runs but never walks?",
+                options: ["A river", "A cheetah", "A tap", "A rumor"],
+                correct: "A river"
+            },
+            {
+                question: "I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?",
+                options: ["An echo", "A ghost", "A shadow", "A tree"],
+                correct: "An echo"
+            },
+            {
+                question: "What can you hold in your right hand but never in your left hand?",
+                options: ["Your left hand", "A pen", "An apple", "A secret"],
+                correct: "Your left hand"
+            },
+            {
+                question: "What is full of holes but still holds water?",
+                options: ["A net", "A bucket", "A sponge", "A cheese"],
+                correct: "A sponge"
+            },
+            {
+                question: "The more you take, the more you leave behind. What am I?",
+                options: ["Footsteps", "Memories", "A shadow", "Taxes"],
+                correct: "Footsteps"
+            },
+            {
+                question: "What has keys but can’t open locks?",
+                options: ["A piano", "A keyboard", "A treasure chest", "Both A and B"],
+                correct: "Both A and B"
+            },
+            {
+                question: "What is so fragile that saying its name breaks it?",
+                options: ["Silence", "Glass", "A promise", "A soap bubble"],
+                correct: "Silence"
+            },
+            {
+                question: "What has a heart that doesn’t beat?",
+                options: ["A statue", "A deck of cards", "A robot", "A coconut"],
+                correct: "A deck of cards"
+            },
+            {
+                question: "What has ears but cannot hear?",
+                options: ["A cornfield", "A pillow", "A cat", "A rock"],
+                correct: "A cornfield"
+            },
+            {
+                question: "What has a face but can't smile?",
+                options: ["A clock", "A mirror", "A moon", "All of the above"],
+                correct: "All of the above"
+            },
+            {
+                question: "I have branches, but no fruit, trunk, or leaves. What am I?",
+                options: ["A tree", "A bank", "A river", "A broom"],
+                correct: "A bank"
+            },
+            {
+                question: "The more you remove from me, the bigger I get. What am I?",
+                options: ["A hole", "A secret", "A cake", "Debt"],
+                correct: "A hole"
+            },
+            {
+                question: "If two’s company and three’s a crowd, what are four and five?",
+                options: ["A party", "Nine", "A problem", "Math"],
+                correct: "Nine"
+            },
+            {
+                question: "What is always in front of you but can’t be seen?",
+                options: ["Your nose", "The future", "Air", "Your thoughts"],
+                correct: "The future"
+            },
+            {
+                question: "If an electric train is moving north at 100mph and the wind is blowing west at 10mph, which way does the smoke blow?",
+                options: ["North", "South", "West", "Electric trains don't have smoke"],
+                correct: "Electric trains don't have smoke"
+            },
+            {
+                question: "What can be cracked, made, told, and played?",
+                options: ["A joke", "An egg", "A riddle", "All of the above"],
+                correct: "All of the above"
+            }
+];
+
+
+
+        // Variables to track quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 10;
+        let timer;
+
+        // DOM elements
+        const questionEl = document.getElementById("question");
+        const optionsEl = document.getElementById("options");
+        const feedbackEl = document.getElementById("feedback");
+        const scoreEl = document.getElementById("score");
+        const timerEl = document.getElementById("timer");
+
+        // Function to load the current question
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            questionEl.textContent = q.question;
+            optionsEl.innerHTML = ""; // Clear previous options
+
+            // Create buttons for each option
+            q.options.forEach(option => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.classList.add("option");
+                button.addEventListener("click", () => checkAnswer(option));
+                optionsEl.appendChild(button);
+            });
+
+            // Reset feedback and start timer
+            feedbackEl.textContent = "";
+            timeLeft = 10;
+            timerEl.textContent = `Time Left: ${timeLeft}s`;
+            startTimer();
+        }
+
+        // Function to start the countdown timer
+        function startTimer() {
+            clearInterval(timer); // Clear any existing timer
+            timer = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time Left: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    checkAnswer(null); // Time's up, treat as wrong
+                }
+            }, 1000);
+        }
+
+        // Function to check the user's answer
+        function checkAnswer(selected) {
+            clearInterval(timer); // Stop the timer
+            const q = quizData[currentQuestion];
+            if (selected === q.correct) {
+                score++;
+                feedbackEl.textContent = "Correct!";
+                feedbackEl.classList.add("correct");
+            } else {
+                feedbackEl.textContent = `Wrong! The correct answer was ${q.correct}.`;
+                feedbackEl.classList.add("wrong");
+            }
+            scoreEl.textContent = `Score: ${score}`;
+            disableOptions(); // Prevent further clicks
+
+            // Move to next question after a delay
+            setTimeout(() => {
+                feedbackEl.classList.remove("correct", "wrong");
+                currentQuestion++;
+                if (currentQuestion < quizData.length) {
+                    loadQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1500);
+        }
+
+        // Function to disable option buttons after selection
+        function disableOptions() {
+            const buttons = optionsEl.getElementsByClassName("option");
+            for (let button of buttons) {
+                button.disabled = true;
+            }
+        }
+
+        // Function to end the quiz
+        function endQuiz() {
+            questionEl.textContent = "Quiz Over!";
+            optionsEl.innerHTML = "";
+            timerEl.textContent = "";
+            feedbackEl.textContent = `Final Score: ${score} out of ${quizData.length}`;
+        }
+
+        // Start the quiz
+        loadQuestion();
+    </script>
+</body>
+</html>

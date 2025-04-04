@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test</title>
+    <style>
+        /* Mathematical equations-themed body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" opacity="0.2"><text x="20" y="40" font-size="20" fill="%23666">E=mc²</text><text x="150" y="80" font-size="20" fill="%23666">a²+b²=c²</text><text x="300" y="120" font-size="20" fill="%23666">∫f(x)dx</text><text x="50" y="160" font-size="20" fill="%23666">πr²</text><text x="200" y="200" font-size="20" fill="%23666">∑n=1</text><text x="100" y="240" font-size="20" fill="%23666">x²+y²=z²</text><text x="350" y="280" font-size="20" fill="%23666">sin²+cos²=1</text><text x="80" y="320" font-size="20" fill="%23666">d/dx</text></svg>'), #e8ecef;
+            background-size: cover;
+            background-repeat: repeat;
+        }
+
+        /* Container for the typing test */
+        #test-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* Timer display */
+        #timer {
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        /* Sentence to type */
+        #sentence {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+
+        /* Text input styling */
+        #typing-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            outline: none;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        /* Progress bar container */
+        #progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        /* Progress bar fill */
+        #progress-fill {
+            height: 100%;
+            width: 0;
+            background-color: #2ecc71;
+            transition: width 0.1s ease;
+        }
+
+        /* Results and feedback display */
+        #results, #feedback {
+            font-size: 1em;
+            color: #555;
+            margin-top: 10px;
+            word-wrap: break-word;
+        }
+
+        #feedback.error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        #feedback.criticism {
+            color: #e67e22;
+        }
+
+        /* Button container */
+        #button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Start and Finish button styling */
+        #start-btn, #finish-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+            width: 100%;
+            max-width: 150px;
+        }
+
+        #start-btn:hover, #finish-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #finish-btn {
+            display: none; /* Hidden until test starts */
+            background-color: #e74c3c;
+        }
+
+        #finish-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 600px) {
+            #test-container {
+                padding: 10px;
+            }
+            #sentence {
+                font-size: 1em;
+            }
+            #typing-input {
+                font-size: 0.9em;
+            }
+            #start-btn, #finish-btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+                max-width: 120px;
+            }
+            #results, #feedback {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Typing test container -->
+    <div id="test-container">
+        <div id="timer">Time Left: 60s</div>
+        <div id="sentence"></div>
+        <input type="text" id="typing-input" placeholder="Click Start or press Enter to begin..." disabled>
+        <div id="progress-bar">
+            <div id="progress-fill"></div>
+        </div>
+        <div id="button-container">
+            <button id="start-btn">Start</button>
+            <button id="finish-btn">Finish</button>
+        </div>
+        <div id="results"></div>
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        // Sample sentences for the test (13 total, ~40 WPM can type 6-8 in a minute)
+        const sentences = [
+            "The quick brown fox jumps over the lazy dog.",
+            "A journey of a thousand miles begins with a single step.",
+            "Practice makes perfect in all things you do.",
+            "Rain falls gently on the green leaves today.",
+            "The sun sets behind the tall mountains now.",
+            "Birds sing sweetly in the early morning light.",
+            "A cool breeze flows through the open window.",
+            "Flowers bloom brightly in the warm spring air.",
+            "The river runs smoothly under the old bridge.",
+            "Stars shine clearly in the dark night sky.",
+            "A cat sleeps quietly on the soft cushion.",
+            "Trees sway slowly in the calm evening wind.",
+            "The moon glows softly above the quiet town."
+        ];
+
+        // DOM elements
+        const timerEl = document.getElementById("timer");
+        const sentenceEl = document.getElementById("sentence");
+        const typingInput = document.getElementById("typing-input");
+        const startBtn = document.getElementById("start-btn");
+        const finishBtn = document.getElementById("finish-btn");
+        const resultsEl = document.getElementById("results");
+        const feedbackEl = document.getElementById("feedback");
+        const progressFill = document.getElementById("progress-fill");
+
+        // Variables to track test state
+        let timeLeft = 60;
+        let timerId, currentSentence, testActive = false, previousWpm = 0, totalWordsTyped = 0;
+
+        // Function to pick a random sentence
+        function getRandomSentence() {
+            const randomIndex = Math.floor(Math.random() * sentences.length);
+            return sentences[randomIndex];
+        }
+
+        // Function to start the test
+        function startTest() {
+            currentSentence = getRandomSentence();
+            sentenceEl.textContent = currentSentence;
+            typingInput.value = "";
+            typingInput.disabled = false;
+            typingInput.focus();
+            resultsEl.textContent = "";
+            feedbackEl.textContent = "";
+            progressFill.style.width = "0%";
+            timeLeft = 60;
+            totalWordsTyped = 0;
+            timerEl.textContent = `Time Left: ${timeLeft}s`;
+            testActive = true;
+            startBtn.style.display = "none"; // Hide start button
+            finishBtn.style.display = "block"; // Show finish button
+            startTimer();
+        }
+
+        // Function to start the 60-second timer
+        function startTimer() {
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time Left: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        // Function to calculate WPM and accuracy
+        function calculateResults() {
+            const typedText = typingInput.value.trim();
+            const wordsTyped = typedText.split(/\s+/).filter(word => word.length > 0).length; // Count valid words
+            totalWordsTyped += wordsTyped;
+            const elapsedTime = 60 - timeLeft;
+            const wpm = elapsedTime > 0 ? Math.round(totalWordsTyped / elapsedTime * 60) : 0;
+
+            // Calculate accuracy for the current sentence
+            const originalWords = currentSentence.split(/\s+/).filter(word => word.length > 0);
+            const typedWords = typedText.split(/\s+/).filter(word => word.length > 0);
+            let correctWords = 0;
+            for (let i = 0; i < Math.min(originalWords.length, typedWords.length); i++) {
+                if (originalWords[i] === typedWords[i]) correctWords++;
+            }
+            const accuracy = originalWords.length > 0 ? Math.round((correctWords / originalWords.length) * 100) : 0;
+
+            return { wpm, accuracy };
+        }
+
+        // Function to update progress bar
+        function updateProgress() {
+            const typedText = typingInput.value.trim();
+            const progress = (typedText.length / currentSentence.length) * 100;
+            progressFill.style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        // Function to provide constructive criticism based on performance
+        function getFeedback(wpm, accuracy) {
+            let criticism = "";
+
+            if (wpm < 30) {
+                criticism = "Increase speed by practicing without looking at the keyboard.";
+            } else if (wpm < 50) {
+                criticism = "Improve fluency by typing longer sentences consistently.";
+            } else if (accuracy < 80) {
+                criticism = "Reduce errors by slowing down slightly for accuracy.";
+            } else {
+                criticism = "Push your limits with more complex sentences.";
+            }
+
+            return criticism;
+        }
+
+        // Function to end the test and show results
+        function endTest() {
+            if (!testActive) return;
+            testActive = false;
+            clearInterval(timerId);
+            typingInput.disabled = true;
+            finishBtn.style.display = "none"; // Hide finish button
+
+            // Check if any typing occurred
+            if (totalWordsTyped === 0) {
+                resultsEl.textContent = "No typing detected.";
+                feedbackEl.textContent = "Error: You must type at least one sentence to get a score.";
+                feedbackEl.classList.add("error");
+            } else {
+                const { wpm, accuracy } = calculateResults();
+                resultsEl.textContent = `WPM: ${wpm} | Accuracy: ${accuracy}%`;
+                const criticism = getFeedback(wpm, accuracy);
+                feedbackEl.textContent = criticism;
+                feedbackEl.classList.add("criticism");
+                previousWpm = wpm; // Store for next comparison
+            }
+
+            startBtn.style.display = "block"; // Show start button again
+        }
+
+        // Event listener for start button
+        startBtn.addEventListener("click", startTest);
+
+        // Event listener for finish button
+        finishBtn.addEventListener("click", endTest);
+
+        // Event listener for typing input
+        typingInput.addEventListener("input", () => {
+            if (!testActive) return;
+            updateProgress();
+        });
+
+        // Event listener for Enter key
+        typingInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                if (!testActive) {
+                    startTest(); // Start test if not active
+                } else if (typingInput.value.trim() === currentSentence) {
+                    calculateResults(); // Update total words typed
+                    if (timeLeft > 0) {
+                        currentSentence = getRandomSentence();
+                        sentenceEl.textContent = currentSentence;
+                        typingInput.value = "";
+                        feedbackEl.textContent = ""; // Clear any previous error
+                        updateProgress();
+                    } else {
+                        endTest();
+                    }
+                } else if (typingInput.value.trim() !== "") {
+                    feedbackEl.textContent = "Error: Finish the sentence correctly before moving on.";
+                    feedbackEl.classList.add("error");
+                } else {
+                    endTest(); // Finish test if Enter pressed with empty input
+                }
+            }
+        });
+    </script>
+</body>
+</html>
