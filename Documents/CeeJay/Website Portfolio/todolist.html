@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature-Inspired To-Do List</title>
+    <style>
+        /* Nature-inspired body styling with dynamic background */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #a8e063, #56ab2f); /* Default: lush green */
+            transition: background 1s ease;
+        }
+
+        /* Container for the to-do list */
+        #todo-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 450px;
+            text-align: center;
+        }
+
+        /* Heading with a natural vibe */
+        h1 {
+            color: #2d6a4f;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        /* Input section styling */
+        #input-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #task-input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #74c69d;
+            border-radius: 5px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        #category-select, #priority-select {
+            padding: 8px;
+            border: 2px solid #74c69d;
+            border-radius: 5px;
+            background-color: #d8f3dc;
+        }
+
+        #add-btn {
+            padding: 8px 15px;
+            background-color: #40916c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #add-btn:hover {
+            background-color: #2d6a4f;
+        }
+
+        /* Task list styling */
+        #task-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            min-height: 50px; /* Ensures drop zone visibility */
+        }
+
+        /* Individual task item */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #d8f3dc;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: move; /* Indicates draggable */
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: scale(1.02);
+        }
+
+        .task-item.dragging {
+            opacity: 0.5;
+            background-color: #b7e4c7;
+        }
+
+        /* Custom checkbox styling (leaf-inspired) */
+        .checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2374c69d" stroke-width="2"><path d="M12 22s-8-4-8-10 4-6 8-6 8 4 8 10-4 6-8 6z"/></svg>') no-repeat center;
+            background-size: contain;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .checkbox:checked {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2340916c"><path d="M12 22s-8-4-8-10 4-6 8-6 8 4 8 10-4 6-8 6z"/><path fill="white" d="M10 17l-4-4 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') no-repeat center;
+            background-size: contain;
+        }
+
+        /* Task text styling */
+        .task-text {
+            flex-grow: 1;
+            text-align: left;
+            color: #1b4332;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: #95d5b2;
+        }
+
+        /* Category and priority badges */
+        .category, .priority {
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        .category {
+            background-color: #95d5b2;
+        }
+
+        .priority-high { background-color: #e63946; color: white; }
+        .priority-medium { background-color: #f4a261; color: white; }
+        .priority-low { background-color: #74c69d; color: white; }
+
+        /* Delete button styling */
+        .delete-btn {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #d00000;
+        }
+    </style>
+</head>
+<body>
+    <!-- To-do list container -->
+    <div id="todo-container">
+        <h1>🌿 To-Do List</h1>
+        <div id="input-section">
+            <input type="text" id="task-input" placeholder="Add a task...">
+            <select id="category-select">
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Shopping">Shopping</option>
+            </select>
+            <select id="priority-select">
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+            <button id="add-btn">Add</button>
+        </div>
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        // DOM elements
+        const taskInput = document.getElementById("task-input");
+        const categorySelect = document.getElementById("category-select");
+        const prioritySelect = document.getElementById("priority-select");
+        const addBtn = document.getElementById("add-btn");
+        const taskList = document.getElementById("task-list");
+        const body = document.body;
+
+        // Function to add a new task
+        function addTask() {
+            const taskText = taskInput.value.trim();
+            if (taskText === "") return; // Ignore empty input
+
+            // Create task item elements
+            const li = document.createElement("li");
+            li.classList.add("task-item");
+            li.draggable = true; // Enable drag-and-drop
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.classList.add("checkbox");
+
+            const span = document.createElement("span");
+            span.textContent = taskText;
+            span.classList.add("task-text");
+
+            const categorySpan = document.createElement("span");
+            categorySpan.textContent = categorySelect.value;
+            categorySpan.classList.add("category");
+
+            const prioritySpan = document.createElement("span");
+            prioritySpan.textContent = prioritySelect.value;
+            prioritySpan.classList.add("priority", `priority-${prioritySelect.value}`);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.classList.add("delete-btn");
+
+            // Append elements to the task item
+            li.appendChild(checkbox);
+            li.appendChild(categorySpan);
+            li.appendChild(prioritySpan);
+            li.appendChild(span);
+            li.appendChild(deleteBtn);
+            taskList.appendChild(li);
+
+            // Clear input
+            taskInput.value = "";
+
+            // Event listeners for checkbox and delete button
+            checkbox.addEventListener("change", () => {
+                span.classList.toggle("completed", checkbox.checked);
+                updateBackground();
+            });
+
+            deleteBtn.addEventListener("click", () => {
+                li.remove();
+                updateBackground();
+            });
+
+            // Drag-and-drop event listeners
+            li.addEventListener("dragstart", () => li.classList.add("dragging"));
+            li.addEventListener("dragend", () => li.classList.remove("dragging"));
+
+            // Update background on task addition
+            updateBackground();
+        }
+
+        // Function to handle drag-and-drop reordering
+        taskList.addEventListener("dragover", (e) => {
+            e.preventDefault(); // Allow drop
+            const draggingItem = document.querySelector(".dragging");
+            const afterElement = getDragAfterElement(taskList, e.clientY);
+            if (afterElement == null) {
+                taskList.appendChild(draggingItem);
+            } else {
+                taskList.insertBefore(draggingItem, afterElement);
+            }
+        });
+
+        // Function to determine where to drop the dragged item
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll(".task-item:not(.dragging)")];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Function to update background based on task completion
+        function updateBackground() {
+            const tasks = taskList.getElementsByClassName("task-item");
+            const completedTasks = taskList.getElementsByClassName("completed").length;
+            const totalTasks = tasks.length;
+
+            if (totalTasks === 0) {
+                body.style.background = "linear-gradient(135deg, #a8e063, #56ab2f)"; // Default green
+            } else if (completedTasks === totalTasks) {
+                body.style.background = "linear-gradient(135deg, #ffd700, #ffaa00)"; // Golden for all completed
+            } else {
+                const progress = completedTasks / totalTasks;
+                body.style.background = `linear-gradient(135deg, #a8e063, #ffaa00 ${progress * 100}%)`; // Green to gold gradient
+            }
+        }
+
+        // Add task on button click
+        addBtn.addEventListener("click", addTask);
+
+        // Add task on Enter key press
+        taskInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") addTask();
+        });
+    </script>
+</body>
+</html>
