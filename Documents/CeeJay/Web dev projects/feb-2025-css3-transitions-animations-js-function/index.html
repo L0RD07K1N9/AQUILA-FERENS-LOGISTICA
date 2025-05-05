@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Switcher with Animations</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s ease;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Button styles with CSS transition */
+        .theme-btn {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Button hover effect */
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* CSS Animation for button click */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* Theme-specific styles */
+        .light {
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        .dark {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .blue {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body class="light">
+    <div class="container">
+        <h1>Theme Switcher</h1>
+        <p>Click a button to change the theme!</p>
+        <button class="theme-btn" data-theme="light">Light Theme</button>
+        <button class="theme-btn" data-theme="dark">Dark Theme</button>
+        <button class="theme-btn" data-theme="blue">Blue Theme</button>
+    </div>
+
+    <script>
+        // Theme Switcher JavaScript with localStorage
+        (function () {
+            // Get all theme buttons
+            const buttons = document.querySelectorAll('.theme-btn');
+            const body = document.body;
+
+            // Load saved theme from localStorage on page load
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                setTheme(savedTheme);
+            }
+
+            // Set theme and update body class
+            function setTheme(theme) {
+                body.className = theme; // Update body class
+                localStorage.setItem('theme', theme); // Save to localStorage
+            }
+
+            // Apply animation to button
+            function animateButton(button) {
+                button.classList.add('pulse-animation');
+                // Remove animation class after animation completes
+                button.addEventListener('animationend', () => {
+                    button.classList.remove('pulse-animation');
+                }, { once: true });
+            }
+
+            // Add click event listeners to buttons
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const theme = button.getAttribute('data-theme');
+                    setTheme(theme); // Apply theme
+                    animateButton(button); // Trigger animation
+                });
+            });
+
+            // Initialize theme on page load
+            loadTheme();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+section {
+    margin: 20px 0;
+}
+
+/* Button Section */
+#magic-button {
+    padding: 10px 20px;
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+}
+
+#magic-button:hover {
+    background-color: #3700b3;
+    transform: scale(1.1);
+}
+
+#button-text {
+    margin-top: 10px;
+    transition: color 0.3s;
+}
+
+/* Slideshow */
+.slideshow-container {
+    position: relative;
+    max-width: 600px;
+    margin: auto;
+}
+
+.slide {
+    display: none;
+    width: 100%;
+    animation: fade 0.5s ease-in-out;
+}
+
+.slide.active {
+    display: block;
+}
+
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.prev { left: 0; }
+.next { right: 0; }
+
+@keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Tabs */
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background-color: #6200ea;
+    color: white;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #ddd;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Form */
+form div {
+    margin: 10px 0;
+}
+
+input {
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #27ae60;
+}
+
+.error {
+    color: red;
+    font-size: 0.9em;
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .slideshow-container { max-width: 100%; }
+    input { max-width: 100%; }
+}

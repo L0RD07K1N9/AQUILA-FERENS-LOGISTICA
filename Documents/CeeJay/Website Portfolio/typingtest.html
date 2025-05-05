@@ -48,6 +48,7 @@
             background-color: #f9f9f9;
             border-radius: 5px;
             word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         /* Text input styling */
@@ -60,6 +61,7 @@
             outline: none;
             margin-bottom: 15px;
             box-sizing: border-box;
+            resize: none; /* Prevent resizing on mobile */
         }
 
         /* Progress bar container */
@@ -86,6 +88,7 @@
             color: #555;
             margin-top: 10px;
             word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         #feedback.error {
@@ -103,6 +106,7 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
         }
 
         /* Start and Finish button styling */
@@ -117,6 +121,7 @@
             transition: background-color 0.3s;
             width: 100%;
             max-width: 150px;
+            touch-action: manipulation; /* Ensure touch events work */
         }
 
         #start-btn:hover, #finish-btn:hover {
@@ -136,20 +141,28 @@
         @media (max-width: 600px) {
             #test-container {
                 padding: 10px;
+                margin: 0 auto;
+            }
+            #timer {
+                font-size: 1em;
             }
             #sentence {
-                font-size: 1em;
+                font-size: 0.95em;
             }
             #typing-input {
                 font-size: 0.9em;
+                padding: 8px;
             }
             #start-btn, #finish-btn {
                 padding: 8px 15px;
                 font-size: 0.9em;
-                max-width: 120px;
+                max-width: 130px;
             }
             #results, #feedback {
                 font-size: 0.9em;
+            }
+            #progress-bar {
+                height: 8px;
             }
         }
     </style>
@@ -310,11 +323,18 @@
             startBtn.style.display = "block"; // Show start button again
         }
 
-        // Event listener for start button
+        // Event listeners for buttons with touch support
         startBtn.addEventListener("click", startTest);
+        startBtn.addEventListener("touchstart", (e) => {
+            e.preventDefault(); // Prevent default touch behavior
+            startTest();
+        });
 
-        // Event listener for finish button
         finishBtn.addEventListener("click", endTest);
+        finishBtn.addEventListener("touchstart", (e) => {
+            e.preventDefault(); // Prevent default touch behavior
+            endTest();
+        });
 
         // Event listener for typing input
         typingInput.addEventListener("input", () => {
